@@ -1,8 +1,7 @@
 #!/bin/sh
+# Dieses Skript basiert auf der Vorlage von Ruben Kelevra.
 # ff-offline-ssid by RubenKelevra 2013-2015 - ruben@vfn-nrw.de
 # Lizenz: AGPL 3.0 
-
-#Warning: If SSID was changed in uci, which belongs to freifunk, you need to run "wifi" before you rerun this script.
 
 #This script expect that an temporary SSID is set on boot. The script will read an online-ssid from uci and set it when node sees batman-gateways.
 
@@ -250,7 +249,7 @@ while [ `cat /proc/uptime | cut -d"." -f1` -lt $END ]; do
 #	else
 #		SSID_0_OFFLINE=$SSID_0_ONLINE
 #	fi
-	SSID_0_OFFLINE="Kein-Internet-$SSID_0_ONLINE"
+	SSID_0_OFFLINE="Kein-Internet-Freifunk"
 
 	# get hostap-status
 	SSID_0=`cat $HOSTAPD_PHY0 | grep "^ssid=$SSID_0_ONLINE"`
@@ -297,7 +296,7 @@ while [ `cat /proc/uptime | cut -d"." -f1` -lt $END ]; do
 #		else
 #			SSID_1_OFFLINE=$SSID_1_ONLINE
 #		fi
-		SSID_1_OFFLINE="Kein-Internet-$SSID_1_ONLINE"
+		SSID_1_OFFLINE="Kein-Internet-Freifunk (5Ghz)"
 
 		# get hostap-status
 		SSID_1=`cat $HOSTAPD_PHY1 | grep "^ssid=$SSID_1_ONLINE"`
@@ -380,16 +379,12 @@ while [ `cat /proc/uptime | cut -d"." -f1` -lt $END ]; do
 			continue
 		fi	
 		
-		[ ! -z "$SSID_0_ONLINE" ] && sed -i -e "s/^ssid=$SSID_0_ONLINE/$SSID_0/" "$HOSTAPD_PHY0"
-		[ ! -z "$SSID_0_OFFLINE" ] && sed -i -e "s/^ssid=$SSID_0_OFFLINE/$SSID_0/" "$HOSTAPD_PHY0"
-		[ ! -z "$SSID_0_BOOT" ] && sed -i -e "s/^ssid=$SSID_0_BOOT/$SSID_0/" "$HOSTAPD_PHY0"
+		sed -i -e "/wpa=0/,/bridge=br-client/{s/.*ssid.*/$SSID_0/}" "$HOSTAPD_PHY0"
 		
 		if [ $RADIOONE -eq 1 ]; then
 		
 			if [ -f $HOSTAPD_PHY1 ]; then
-				[ ! -z "$SSID_1_ONLINE" ] && sed -i -e "s/^ssid=$SSID_1_ONLINE/$SSID_1/" "$HOSTAPD_PHY1"
-				[ ! -z "$SSID_1_OFFLINE" ] && sed -i -e "s/^ssid=$SSID_1_OFFLINE/$SSID_1/" "$HOSTAPD_PHY1"
-				[ ! -z "$SSID_1_BOOT" ] && sed -i -e "s/^ssid=$SSID_1_BOOT/$SSID_1/" "$HOSTAPD_PHY1"
+				sed -i -e "/wpa=0/,/bridge=br-client/{s/.*ssid.*/$SSID_1/}" "$HOSTAPD_PHY0"
 			else
 				echo "Error: Hostapd-phy1.conf is gone ... we can't process the SSID-change for radio1"
 			fi
